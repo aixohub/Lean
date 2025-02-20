@@ -100,6 +100,11 @@ Start live trading a project locally using Docker
 lean live
 ```
 
+```
+dotnet sln QuantConnect.Lean.sln add  Brokerages.InteractiveBrokers/QuantConnect.Brokerages.InteractiveBrokers.csproj
+
+```
+
 Download the [LEAN CLI Cheat Sheet](https://cdn.quantconnect.com/i/tu/cli-cheat-sheet.pdf) for the full list of commands.
 
 #

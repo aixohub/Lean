@@ -1,12 +1,62 @@
-#
-#   LEAN Docker Container 20200522
-#   Cross platform deployment for multiple brokerages
-#
+FROM phusion/baseimage:noble-1.0.0
 
-# Use base system
-FROM quantconnect/lean:foundation
+# Use baseimage-docker's init system.
+CMD ["/sbin/my_init"]
 
-MAINTAINER QuantConnect <contact@quantconnect.com>
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update \
+    && apt-get install -y git build-essential bzip2 curl unzip wget python3-pip python3-opengl zlib1g-dev \
+    && apt-get clean && apt-get autoclean && apt-get autoremove --purge -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dotnet 9 sdk & runtime
+# The .deb packages don't support ARM, the install script does
+ENV PATH="/root/.dotnet:${PATH}"
+RUN wget https://dot.net/v1/dotnet-install.sh && \
+    chmod 777 dotnet-install.sh && \
+    ./dotnet-install.sh -c 9.0 && \
+    rm dotnet-install.sh
+ENV DOTNET_ROOT="/root/.dotnet"
+
+# Set PythonDLL variable for PythonNet
+ENV PYTHONNET_PYDLL="/opt/miniconda3/lib/libpython3.11.so"
+
+# Install miniconda
+ENV CONDA="Miniconda3-py311_24.9.2-0-Linux-aarch64.sh"
+ENV PATH="/opt/miniconda3/bin:${PATH}"
+RUN wget -q https://cdn.quantconnect.com/miniconda/${CONDA} && \
+    bash ${CONDA} -b -p /opt/miniconda3 && rm -rf ${CONDA}
+
+USER root
+RUN mkdir -p  /Lean &&  mkdir -p /var/run  && \
+    mkdir -p  /Lean/Launcher/bin/Debug/ &&  mkdir -p  /Lean/Data/  && \
+    mkdir -p  /Lean/Optimizer.Launcher/bin/Debug/ &&  mkdir -p  /Lean/Report/bin/Debug/  && \
+    mkdir -p  /Lean/DownloaderDataProvider/bin/Debug/  && \
+    groupadd -g 1001 work && useradd -g work -G work -u 1000 -d /Lean  work
+  
+
+
+RUN python -m pip install --upgrade pip
+
+
+# Avoid pip install read timeouts
+ENV PIP_DEFAULT_TIMEOUT=120
+
+# Install numpy first to avoid it not being resolved when installing libraries that depend on it next
+RUN pip install --no-cache-dir numpy==1.26.4  scipy==1.11.4   pythonnet              
+
+# Install newer (than provided by ubuntu) cmake required by scikit build process
+RUN conda install -c conda-forge cmake==3.28.4 && conda clean -y --all
+
+# The list of packages in this image is shorter than the list in the AMD images
+# This list only includes packages that can be installed within 2 minutes on ARM
+RUN pip install      \
+    cython==3.0.9                   \
+    pandas==2.1.4                   \
+    scipy==1.11.4                   \
+    numpy==1.26.4                   \
+    jupyterlab==4.3.2               \
+    jupyterlab-widgets==3.0.13      
+  
 
 #Install debugpy and PyDevD for remote python debugging
 RUN pip install --no-cache-dir ptvsd==4.3.2 debugpy~=1.6.7 pydevd-pycharm~=231.9225.15
