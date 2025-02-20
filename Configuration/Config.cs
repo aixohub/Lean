@@ -84,9 +84,11 @@ namespace QuantConnect.Configuration
 
         private static JObject ConfigFactory()
         {
+
             // initialize settings inside a lazy for free thread-safe, one-time initialization
             if (!File.Exists(ConfigurationFileName))
             {
+                Log.Trace(Invariant($"ConfigFactory -----  {ConfigurationFileName}  configuration file not found"));
                 return new JObject
                 {
                     {"algorithm-type-name", "BasicTemplateAlgorithm"},
@@ -102,8 +104,14 @@ namespace QuantConnect.Configuration
                     {"transaction-handler", "QuantConnect.Lean.Engine.TransactionHandlers.BacktestingTransactionHandler"}
                 };
             }
+            
+            Log.Trace(Invariant($"ConfigFactory ----- Using {ConfigurationFileName} as configuration file"));
 
-            return JObject.Parse(File.ReadAllText(ConfigurationFileName));
+            var data  =JObject.Parse(File.ReadAllText(ConfigurationFileName));
+
+            Log.Trace(Invariant($"ConfigFactory ----- data: {data} "));
+
+            return data;
         }
 
         /// <summary>
@@ -149,6 +157,7 @@ namespace QuantConnect.Configuration
                 Log.Trace(Invariant($"Config.Get(): Configuration key not found. Key: {key} - Using default value: {defaultValue}"));
                 return defaultValue;
             }
+            Log.Trace(Invariant($"Config.Get(): Configuration key found. Key: {key} - Using  value: {token.ToString()}"));
             return token.ToString();
         }
 
@@ -410,6 +419,7 @@ namespace QuantConnect.Configuration
 
         private static JToken GetToken(JToken settings, string key)
         {
+
             return GetToken(settings, key, settings.SelectToken(key));
         }
 
