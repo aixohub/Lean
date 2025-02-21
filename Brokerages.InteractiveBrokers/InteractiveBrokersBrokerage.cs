@@ -288,7 +288,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 orderProvider,
                 securityProvider,
                 account,
-                Config.Get("ib-host", "LOCALHOST"),
+                Config.Get("ib-host", "127.0.0.1"),
                 Config.GetInt("ib-port", 4001),
                 Config.Get("ib-tws-dir"),
                 Config.Get("ib-version", DefaultVersion),
@@ -956,8 +956,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 return true;
             }
 
-            if (!_isDisposeCalled &&
-                !_ibAutomater.IsWithinScheduledServerResetTimes() &&
+            if (!_isDisposeCalled  &&
                 IsConnected &&
                 // do not run heart beat if we are close to daily restarts
                 DateTime.Now.TimeOfDay < _heartBeatTimeLimit &&
@@ -1182,8 +1181,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
 
             _aggregator.DisposeSafely();
-            _ibAutomater?.Stop();
-            _ibAutomater.DisposeSafely();
+            // _ibAutomater?.Stop();
+            // _ibAutomater.DisposeSafely();
 
             _messagingRateLimiter.DisposeSafely();
             _concurrentHistoryRequests.DisposeSafely();
@@ -1267,13 +1266,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             // start IB Gateway
             var exportIbGatewayLogs = true; // Config.GetBool("ib-export-ibgateway-logs");
-            _ibAutomater = new IBAutomater.IBAutomater(ibDirectory, ibVersion, userName, password, tradingMode, port, exportIbGatewayLogs);
-            _ibAutomater.OutputDataReceived += OnIbAutomaterOutputDataReceived;
-            _ibAutomater.ErrorDataReceived += OnIbAutomaterErrorDataReceived;
-            _ibAutomater.Exited += OnIbAutomaterExited;
-            _ibAutomater.Restarted += OnIbAutomaterRestarted;
+            // _ibAutomater = new IBAutomater.IBAutomater(ibDirectory, ibVersion, userName, password, tradingMode, port, exportIbGatewayLogs);
+            // _ibAutomater.OutputDataReceived += OnIbAutomaterOutputDataReceived;
+            // _ibAutomater.ErrorDataReceived += OnIbAutomaterErrorDataReceived;
+            // _ibAutomater.Exited += OnIbAutomaterExited;
+            // _ibAutomater.Restarted += OnIbAutomaterRestarted;
 
-            CheckIbAutomaterError(_ibAutomater.Start(false));
+            // CheckIbAutomaterError(_ibAutomater.Start(false));
 
             // default the weekly restart to one hour before FX market open (GetNextWeekendReconnectionTimeUtc)
             _weeklyRestartUtcTime = weeklyRestartUtcTime ?? _defaultWeeklyRestartUtcTime;
@@ -4627,22 +4626,22 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             }
         }
 
-        private void OnIbAutomaterOutputDataReceived(object sender, OutputDataReceivedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(e.Data))
-            {
-                return;
-            }
+        // private void OnIbAutomaterOutputDataReceived(object sender, OutputDataReceivedEventArgs e)
+        // {
+        //     if (string.IsNullOrEmpty(e.Data))
+        //     {
+        //         return;
+        //     }
 
-            if (e.Data.Contains("Waiting for 2FA confirmation", StringComparison.InvariantCultureIgnoreCase))
-            {
-                // composer get IResultHandler send message
-                var resultHandler = Composer.Instance.GetPart<IResultHandler>();
-                resultHandler?.DebugMessage("Logging into account. Check phone for two-factor authentication verification...");
-            }
+        //     if (e.Data.Contains("Waiting for 2FA confirmation", StringComparison.InvariantCultureIgnoreCase))
+        //     {
+        //         // composer get IResultHandler send message
+        //         var resultHandler = Composer.Instance.GetPart<IResultHandler>();
+        //         resultHandler?.DebugMessage("Logging into account. Check phone for two-factor authentication verification...");
+        //     }
 
-            Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterOutputDataReceived(): {e.Data}");
-        }
+        //     Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterOutputDataReceived(): {e.Data}");
+        // }
 
         private void StopGatewayRestartTask()
         {
@@ -4774,16 +4773,16 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
                     try
                     {
-                        if (_ibAutomater.IsRunning())
-                        {
-                            // stopping the gateway will make the IBAutomater emit the exit event, which will trigger the restart
-                            _ibAutomater?.Stop();
-                        }
-                        else
-                        {
-                            // if the gateway is not running, we start it
-                            CheckIbAutomaterError(_ibAutomater.Start(false));
-                        }
+                        // if (_ibAutomater.IsRunning())
+                        // {
+                        //     // stopping the gateway will make the IBAutomater emit the exit event, which will trigger the restart
+                        //     _ibAutomater?.Stop();
+                        // }
+                        // else
+                        // {
+                        //     // if the gateway is not running, we start it
+                        //     CheckIbAutomaterError(_ibAutomater.Start(false));
+                        // }
                     }
                     catch (Exception ex)
                     {
@@ -4796,74 +4795,74 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             });
         }
 
-        private void OnIbAutomaterErrorDataReceived(object sender, ErrorDataReceivedEventArgs e)
-        {
-            if (e.Data == null) return;
+        // private void OnIbAutomaterErrorDataReceived(object sender, ErrorDataReceivedEventArgs e)
+        // {
+        //     if (e.Data == null) return;
 
-            Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterErrorDataReceived(): {e.Data}");
-        }
+        //     Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterErrorDataReceived(): {e.Data}");
+        // }
 
-        private void OnIbAutomaterExited(object sender, ExitedEventArgs e)
-        {
-            lock (_lastIBAutomaterExitTimeLock)
-            {
-                _lastIBAutomaterExitTime = DateTime.UtcNow;
-            }
+        // private void OnIbAutomaterExited(object sender, ExitedEventArgs e)
+        // {
+        //     lock (_lastIBAutomaterExitTimeLock)
+        //     {
+        //         _lastIBAutomaterExitTime = DateTime.UtcNow;
+        //     }
 
-            Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): Exit code: {e.ExitCode}");
+        //     Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): Exit code: {e.ExitCode}");
 
-            _stateManager.Reset();
-            StopGatewayRestartTask();
+        //     _stateManager.Reset();
+        //     StopGatewayRestartTask();
 
-            if (_isDisposeCalled)
-            {
-                return;
-            }
+        //     if (_isDisposeCalled)
+        //     {
+        //         return;
+        //     }
 
-            // check if IBGateway was closed because of an IBAutomater error, die if so
-            var result = _ibAutomater.GetLastStartResult();
-            CheckIbAutomaterError(result, false);
+        //     // check if IBGateway was closed because of an IBAutomater error, die if so
+        //     var result = _ibAutomater.GetLastStartResult();
+        //     CheckIbAutomaterError(result, false);
 
-            if (!result.HasError)
-            {
-                // IBGateway was closed by IBAutomater because the auto-restart token expired or it was closed manually (less likely)
-                Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterExited(): IBGateway close detected, restarting IBAutomater...");
+        //     if (!result.HasError)
+        //     {
+        //         // IBGateway was closed by IBAutomater because the auto-restart token expired or it was closed manually (less likely)
+        //         Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterExited(): IBGateway close detected, restarting IBAutomater...");
 
-                try
-                {
-                    // disconnect immediately so orders will not be submitted to the API while waiting for reconnection
-                    Disconnect();
-                }
-                catch (Exception exception)
-                {
-                    Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): error in Disconnect(): {exception}");
-                }
+        //         try
+        //         {
+        //             // disconnect immediately so orders will not be submitted to the API while waiting for reconnection
+        //             Disconnect();
+        //         }
+        //         catch (Exception exception)
+        //         {
+        //             Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): error in Disconnect(): {exception}");
+        //         }
 
-                var delay = GetWeeklyRestartDelay();
+        //         var delay = GetWeeklyRestartDelay();
 
-                Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): Delay before restart: {delay:d'd 'h'h 'm'm 's's'}");
+        //         Log.Trace($"InteractiveBrokersBrokerage.OnIbAutomaterExited(): Delay before restart: {delay:d'd 'h'h 'm'm 's's'}");
 
-                Task.Delay(delay).ContinueWith(_ =>
-                {
-                    try
-                    {
-                        Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterExited(): restarting...");
+        //         Task.Delay(delay).ContinueWith(_ =>
+        //         {
+        //             try
+        //             {
+        //                 Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterExited(): restarting...");
 
-                        CheckIbAutomaterError(_ibAutomater.Start(false));
+        //                 CheckIbAutomaterError(_ibAutomater.Start(false));
 
-                        Connect();
-                    }
-                    catch (Exception exception)
-                    {
-                        OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterRestartError", exception.ToString()));
-                    }
-                }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
-            }
-            else
-            {
-                OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterError", result.ErrorMessage));
-            }
-        }
+        //                 Connect();
+        //             }
+        //             catch (Exception exception)
+        //             {
+        //                 OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterRestartError", exception.ToString()));
+        //             }
+        //         }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+        //     }
+        //     else
+        //     {
+        //         OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterError", result.ErrorMessage));
+        //     }
+        // }
 
         private TimeSpan GetRestartDelay()
         {
@@ -4891,34 +4890,34 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return _defaultRestartDelay;
         }
 
-        private void OnIbAutomaterRestarted(object sender, EventArgs e)
-        {
-            Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterRestarted()");
+        // private void OnIbAutomaterRestarted(object sender, EventArgs e)
+        // {
+        //     Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterRestarted()");
 
-            _stateManager.Reset();
-            StopGatewayRestartTask();
+        //     _stateManager.Reset();
+        //     StopGatewayRestartTask();
 
-            // check if IBGateway was closed because of an IBAutomater error
-            var result = _ibAutomater.GetLastStartResult();
-            CheckIbAutomaterError(result, false);
+        //     // check if IBGateway was closed because of an IBAutomater error
+        //     var result = _ibAutomater.GetLastStartResult();
+        //     CheckIbAutomaterError(result, false);
 
-            if (!result.HasError && !_isDisposeCalled)
-            {
-                // IBGateway was restarted automatically
-                Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterRestarted(): IBGateway restart detected, reconnecting...");
+        //     if (!result.HasError && !_isDisposeCalled)
+        //     {
+        //         // IBGateway was restarted automatically
+        //         Log.Trace("InteractiveBrokersBrokerage.OnIbAutomaterRestarted(): IBGateway restart detected, reconnecting...");
 
-                try
-                {
-                    Disconnect();
+        //         try
+        //         {
+        //             Disconnect();
 
-                    Connect();
-                }
-                catch (Exception exception)
-                {
-                    OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterAutoRestartError", exception.ToString()));
-                }
-            }
-        }
+        //             Connect();
+        //         }
+        //         catch (Exception exception)
+        //         {
+        //             OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, "IBAutomaterAutoRestartError", exception.ToString()));
+        //         }
+        //     }
+        // }
 
         public static DateTime GetNextSundayFromDate(DateTime date)
         {
@@ -4958,18 +4957,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             return ComputeNextWeeklyRestartTimeUtc(_weeklyRestartUtcTime, currentDate);
         }
 
-        private void CheckIbAutomaterError(StartResult result, bool throwException = true)
-        {
-            if (result.HasError)
-            {
-                OnMessage(new BrokerageMessageEvent(BrokerageMessageType.Error, result.ErrorCode.ToString(), result.ErrorMessage));
-
-                if (throwException)
-                {
-                    throw new Exception($"InteractiveBrokersBrokerage.CheckIbAutomaterError(): {result.ErrorCode} - {result.ErrorMessage}");
-                }
-            }
-        }
+   
 
         private void HandleAccountSummary(object sender, IB.AccountSummaryEventArgs e)
         {
