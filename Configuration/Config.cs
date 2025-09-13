@@ -84,6 +84,7 @@ namespace QuantConnect.Configuration
 
         private static JObject ConfigFactory()
         {
+            Log.Trace(Invariant($"ConfigFactory -----  {ConfigurationFileName}  configuration file not found"));
             // initialize settings inside a lazy for free thread-safe, one-time initialization
             if (!File.Exists(ConfigurationFileName))
             {
@@ -103,7 +104,13 @@ namespace QuantConnect.Configuration
                 };
             }
 
-            return JObject.Parse(File.ReadAllText(ConfigurationFileName));
+            Log.Trace(Invariant($"ConfigFactory ----- Using {ConfigurationFileName} as configuration file"));
+
+            var data  =JObject.Parse(File.ReadAllText(ConfigurationFileName));
+
+            Log.Trace(Invariant($"ConfigFactory ----- data: {data} "));
+
+            return data;
         }
 
         /// <summary>

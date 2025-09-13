@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantConnect.AlgorithmFacto
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantConnect.Brokerages", "Brokerages\QuantConnect.Brokerages.csproj", "{2D3E13CF-2D14-4180-A42D-F0A13AF0ADE2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantConnect.Brokerages.InteractiveBrokers", "Brokerages.InteractiveBrokers\QuantConnect.Brokerages.InteractiveBrokers.csproj", "{64ECC8F7-B4CD-42DD-95D1-4472E5C63AA6}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantConnect.Configuration", "Configuration\QuantConnect.Configuration.csproj", "{0AEB4EA3-28C8-476E-89FD-926F06590B4C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuantConnect.Compression", "Compression\QuantConnect.Compression.csproj", "{BC3BC77E-0502-43DB-A727-B94F9765D74B}"
@@ -106,6 +108,10 @@ Global
 		{2D3E13CF-2D14-4180-A42D-F0A13AF0ADE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3E13CF-2D14-4180-A42D-F0A13AF0ADE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D3E13CF-2D14-4180-A42D-F0A13AF0ADE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64ECC8F7-B4CD-42DD-95D1-4472E5C63AA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64ECC8F7-B4CD-42DD-95D1-4472E5C63AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64ECC8F7-B4CD-42DD-95D1-4472E5C63AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64ECC8F7-B4CD-42DD-95D1-4472E5C63AA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0AEB4EA3-28C8-476E-89FD-926F06590B4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0AEB4EA3-28C8-476E-89FD-926F06590B4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AEB4EA3-28C8-476E-89FD-926F06590B4C}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -52,9 +52,13 @@ namespace QuantConnect.Logging
         /// <param name="text"></param>
         public void Error(string text)
         {
+            var stackFrame = new System.Diagnostics.StackFrame(2, true); // 获取上层调用堆栈
+            var fileName = stackFrame.GetFileName(); // 文件名
+            var lineNumber = stackFrame.GetFileLineNumber(); // 行号
+            var formattedMessage = $"[{fileName}:{lineNumber}] {text}";
             foreach (var handler in _handlers)
             {
-                handler.Error(text);
+                handler.Error(formattedMessage);
             }
         }
 
@@ -64,9 +68,13 @@ namespace QuantConnect.Logging
         /// <param name="text"></param>
         public void Debug(string text)
         {
+            var stackFrame = new System.Diagnostics.StackFrame(2, true); // 获取上层调用堆栈
+            var fileName = stackFrame.GetFileName(); // 文件名
+            var lineNumber = stackFrame.GetFileLineNumber(); // 行号
+            var formattedMessage = $"[{fileName}:{lineNumber}] {text}";
             foreach (var handler in _handlers)
             {
-                handler.Debug(text);
+                handler.Debug(formattedMessage);
             }
         }
 
@@ -76,9 +84,13 @@ namespace QuantConnect.Logging
         /// <param name="text"></param>
         public void Trace(string text)
         {
+            var stackFrame = new System.Diagnostics.StackFrame(2, true); // 获取上层调用堆栈
+            var fileName = stackFrame.GetFileName(); // 文件名
+            var lineNumber = stackFrame.GetFileLineNumber(); // 行号
+            var formattedMessage = $"[{fileName}:{lineNumber}] {text}";
             foreach (var handler in _handlers)
             {
-                handler.Trace(text);
+                handler.Trace(formattedMessage);
             }
         }
 

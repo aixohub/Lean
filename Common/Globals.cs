@@ -16,6 +16,7 @@
 
 using System.IO;
 using System.Reflection;
+using QuantConnect.Logging;
 using QuantConnect.Configuration;
 
 namespace QuantConnect
@@ -97,7 +98,8 @@ namespace QuantConnect
             UserToken = Config.Get("api-access-token");
             OrganizationID = Config.Get("job-organization-id");
             Api = Config.Get("api-url", "https://www.quantconnect.com/api/v2/");
-            ResultsDestinationFolder = Config.Get("results-destination-folder", Directory.GetCurrentDirectory());
+            ResultsDestinationFolder = Config.Get("results-destination-folder", Directory.GetCurrentDirectory() + "/results");
+
         }
 
         /// <summary>
@@ -120,9 +122,11 @@ namespace QuantConnect
         /// </summary>
         public static string GetDataFolderPath(string relativePath)
         {
+            Log.Trace("GetDataFolderPath CacheDataFolder== " + CacheDataFolder);
             var result = Path.Combine(CacheDataFolder, relativePath);
             if (result.IsDirectoryEmpty())
             {
+                Log.Trace("GetDataFolderPath DataFolder== " + DataFolder);
                 result = Path.Combine(DataFolder, relativePath);
             }
 
