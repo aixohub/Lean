@@ -97,7 +97,8 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private IBAutomater.IBAutomater _ibAutomater;
 
         // Existing orders created in TWS can *only* be cancelled/modified when connected with ClientId = 0
-        private const int ClientId = 1;
+        // private const int ClientId = 1;
+        private int _clientId;
 
         // daily restart is at 23:45 local host time
         private static TimeSpan _heartBeatTimeLimit = new(23, 0, 0);
@@ -290,6 +291,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 account,
                 Config.Get("ib-host", "127.0.0.1"),
                 Config.GetInt("ib-port", 4001),
+                Config.GetInt("ib-clientId", 8),
                 Config.Get("ib-tws-dir"),
                 Config.Get("ib-version", DefaultVersion),
                 Config.Get("ib-user-name"),
@@ -325,6 +327,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             string account,
             string host,
             int port,
+            int clientId,
             string ibDirectory,
             string ibVersion,
             string userName,
@@ -342,6 +345,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 account,
                 host,
                 port,
+                clientId,
                 ibDirectory,
                 ibVersion,
                 userName,
@@ -705,7 +709,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             var filter = new ExecutionFilter
             {
                 AcctCode = _account,
-                ClientId = ClientId,
+                ClientId = _clientId,
                 Exchange = exchange,
                 SecType = type ?? IB.SecurityType.Undefined,
                 Symbol = symbol,
@@ -801,7 +805,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
                     // we're going to try and connect several times, if successful break
                     Log.Trace("InteractiveBrokersBrokerage.Connect(): calling _client.ClientSocket.eConnect()");
-                    _client.ClientSocket.eConnect(_host, _port, ClientId);
+                    _client.ClientSocket.eConnect(_host, _port, _clientId);
 
                     if (!_connectEvent.WaitOne(TimeSpan.FromSeconds(15)))
                     {
@@ -1212,6 +1216,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             string account,
             string host,
             int port,
+            int clientId,
             string ibDirectory,
             string ibVersion,
             string userName,
@@ -1253,6 +1258,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             _account = account;
             _host = host;
             _port = port;
+            _clientId = clientId;
             _ibVersion = Convert.ToInt32(ibVersion, CultureInfo.InvariantCulture);
             _agentDescription = agentDescription;
 
@@ -1763,7 +1769,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             if (errorCode == 2105 || errorCode == 2103)
             {
                 // 'connection is broken': if we haven't already let's trigger a gateway restart
-                StartGatewayRestartTask();
+                // StartGatewayRestartTask();
             }
             else if (errorCode == 2106 || errorCode == 2104)
             {
@@ -1791,7 +1797,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                     _stateManager.Disconnected1100Fired = true;
 
                     // begin the try wait logic
-                    TryWaitForReconnect();
+                    // TryWaitForReconnect();
                 }
                 else
                 {
@@ -2545,7 +2551,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
             var ibOrder = new IBApi.Order
             {
-                ClientId = ClientId,
+                ClientId = _clientId,
                 OrderId = ibOrderId,
                 Account = _account,
                 Action = ConvertOrderDirection(direction),
@@ -3527,6 +3533,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         public void SetJob(LiveNodePacket job)
         {
             // read values from the brokerage datas
+            var clientId = Config.GetInt("ib-clientId", 8);
             var port = Config.GetInt("ib-port", 4001);
             var host = Config.Get("ib-host", "127.0.0.1");
             var twsDirectory = Config.Get("ib-tws-dir", "C:\\Jts");
@@ -3550,6 +3557,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 account,
                 host,
                 port,
+                clientId,
                 twsDirectory,
                 ibVersion,
                 userId,

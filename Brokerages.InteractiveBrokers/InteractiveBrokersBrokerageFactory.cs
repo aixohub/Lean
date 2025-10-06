@@ -71,6 +71,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
             var errors = new List<string>();
 
             // read values from the brokerage datas
+            var clientId = Config.GetInt("ib-clientId", 8);
             var port = Config.GetInt("ib-port", 4001);
             var host = Config.Get("ib-host", "127.0.0.1");
             var twsDirectory = Config.Get("ib-tws-dir", "C:\\Jts");
@@ -113,6 +114,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 account,
                 host,
                 port,
+                clientId,
                 twsDirectory,
                 ibVersion,
                 userId,
