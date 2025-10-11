@@ -55,6 +55,7 @@ using Newtonsoft.Json.Linq;
 using QuantConnect.Data.Auxiliary;
 using QuantConnect.Securities.Forex;
 using QuantConnect.Lean.Engine.Results;
+using MathNet.Numerics.Random;
 
 namespace QuantConnect.Brokerages.InteractiveBrokers
 {
@@ -3525,6 +3526,13 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         {
             _currentTimeEvent.Set();
         }
+         private static Random random = new Random();
+    
+        // 生成指定范围的随机整数
+        public static int RandomInt(int minValue = 0, int maxValue = 100)
+        {
+            return random.Next(minValue, maxValue);
+        }
 
         /// <summary>
         /// Sets the job we're subscribing for
@@ -3533,23 +3541,25 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         public void SetJob(LiveNodePacket job)
         {
             // read values from the brokerage datas
-            var clientId = Config.GetInt("ib-clientId", 8);
+            var clientId = Config.GetInt("ib-clientId", 8) + RandomInt(1,200);
             var port = Config.GetInt("ib-port", 4001);
             var host = Config.Get("ib-host", "127.0.0.1");
             var twsDirectory = Config.Get("ib-tws-dir", "C:\\Jts");
             var ibVersion = Config.Get("ib-version", DefaultVersion);
 
-            var account = job.BrokerageData["ib-account"];
-            var userId = job.BrokerageData["ib-user-name"];
-            var password = job.BrokerageData["ib-password"];
-            var tradingMode = job.BrokerageData["ib-trading-mode"];
-            var agentDescription = job.BrokerageData["ib-agent-description"];
+
+            var account = Config.Get("ib-account");
+            var userId = Config.Get("ib-user-name");
+            var password = Config.Get("ib-password");
+            var tradingMode = Config.Get("ib-trading-mode");
+            var agentDescription = Config.Get("ib-agent-description");
 
             var loadExistingHoldings = Config.GetBool("load-existing-holdings", true);
-            if (job.BrokerageData.ContainsKey("load-existing-holdings"))
-            {
-                loadExistingHoldings = Convert.ToBoolean(job.BrokerageData["load-existing-holdings"]);
-            }
+            // if (job.BrokerageData.ContainsKey("load-existing-holdings"))
+            // {
+            //     loadExistingHoldings = Convert.ToBoolean(job.BrokerageData["load-existing-holdings"]);
+            // }
+
 
             Initialize(null,
                 null,
